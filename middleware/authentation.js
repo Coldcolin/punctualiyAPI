@@ -19,7 +19,8 @@ const authenticate = async (req, res, next) => {
             });
         }
         // console.log("check")
-        const decodeToken = jwt.verify(token, process.env.secret_key)
+        // const decodeToken = jwt.verify(token, process.env.secret_key)
+        const decodeToken = jwt.verify(token, 'IamTHeWorlSdBEstDEvEKOper$$$IWillBETHe$$GreAtesT')
         // try {
         //     const decodedToken = jwt.verify(token, process.env.secret_key);
         //     // Token verification successful

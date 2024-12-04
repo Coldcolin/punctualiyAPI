@@ -137,12 +137,12 @@ const verify = async (req, res) => {
 //Function to login a verified user
 const logIn = async (req, res) => {
     try {
-        const { error } = validateUserLogin(req.body);
-        if (error) {
-            return res.status(500).json({
-                message: error.details[0].message
-            })
-        } else {
+        // const { error } = validateUserLogin(req.body);
+        // if (error) {
+        //     return res.status(500).json({
+        //         message: error.details[0].message
+        //     })
+        // } else {
             const { email, password } = req.body;
             const checkEmail = await userModel.findOne({ email: email.toLowerCase() });
             if (!checkEmail) {
@@ -157,8 +157,8 @@ const logIn = async (req, res) => {
                 })
             }
             const token = jwt.sign({
-                userId: checkEmail._id,
-            }, process.env.SECRET, { expiresIn: "5h" });
+                id: checkEmail._id,
+            }, process.env.secret_key, { expiresIn: "7d" });
 
             checkEmail.token = token;
             await checkEmail.save();
@@ -173,7 +173,7 @@ const logIn = async (req, res) => {
                     message: "Sorry user not verified yet."
                 })
             }
-        }
+        // }
 
     } catch (error) {
         return res.status(500).json({
