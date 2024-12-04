@@ -139,7 +139,7 @@ router.post("/signout", authenticate, signOut);
 router.get("/runCheck/:id", runCheck)
 
 //endpoint to add user location and image
-router.post("/checkIn", checkIn);
+router.post("/checkIn", authenticate, checkIn);
 
 //endpoint to get a student Data and calculate the average punctuality for the current week
 router.get('/assessment/:userId', authenticate, assessmentData);
