@@ -775,6 +775,22 @@ const confirmPayment = async(req, res)=>{
     }
 }
 
+const healthCheck = async (req, res) => {
+    try {
+        // Basic health check response
+        return res.status(200).json({
+            status: "success",
+            message: "Server is running and healthy",
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: "error",
+            message: "Server health check failed: " + error.message
+        });
+    }
+};
+
 
 
 
@@ -793,6 +809,7 @@ module.exports = {
     deleteWeekCheckIn,
     deleteAssessment,
     runCheck,
-    confirmPayment
+    confirmPayment,
+    healthCheck
 }
 

@@ -144,6 +144,8 @@ router.post("/checkIn", authenticate, checkIn);
 //endpoint to get a student Data and calculate the average punctuality for the current week
 router.get('/assessment/:userId', authenticate, assessmentData);
 
+router.get('/health', healthCheck);
+
 /**
  * @swagger
  * tags:
