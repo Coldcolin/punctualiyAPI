@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const { signUp, verify, logIn, forgotPassword, resetPasswordPage, resetPassword, signOut, } = require('../controllers/userController');
-const { checkIn, assessmentData, assessmentDataS, fetchCheckInWeekly, fetchAllCheckInWeekly, fetchAssessmentData, fetchOneAssessmentData, deleteCheckIn, deleteWeekCheckIn, deleteAssessment,  runCheck, confirmPayment} = require('../controllers/punctualityController');
+const { checkIn, assessmentData, assessmentDataS, fetchCheckInWeekly, fetchAllCheckInWeekly, fetchAssessmentData, fetchOneAssessmentData, deleteCheckIn, deleteWeekCheckIn, deleteAssessment,  runCheck, confirmPayment, healthCheck} = require('../controllers/punctualityController');
 const { authenticate, } = require("../middleware/authentation");
 
 
