@@ -100,50 +100,98 @@ const checkIn = async (req, res) => {
 
 
             // Upload modified image to Cloudinary
-            const cloudinaryUpload = await cloudinary.uploader.upload_stream({ folder: "AttendanceData-Image" },
-                (error, result) => {
-                    if (error) {
-                        return res.status(500).json({ message: 'An error occurred while uploading the image' + error.message });
-                    }
-                    // Delete the temporary file
-                    fs.unlinkSync(image.tempFilePath);
+            // const cloudinaryUpload = await cloudinary.uploader.upload_stream({ folder: "AttendanceData-Image" },
+            //     (error, result) => {
+            //         if (error) {
+            //             return res.status(500).json({ message: 'An error occurred while uploading the image' + error.message });
+            //         }
+            //         // Delete the temporary file
+            //         fs.unlinkSync(image.tempFilePath);
 
-                    let score;
+            //         let score;
 
-                    let newTime = newDate.toLocaleTimeString('en-US', { hour12: false });
+            //         let newTime = newDate.toLocaleTimeString('en-US', { hour12: false });
 
-                    if (newTime > "10:00:00") {
-                        score = 0;
-                    } else if (newTime <= "10:00:00" && newTime >= "09:46:00") {
-                        score = 10;
-                    } else if (newTime <= "09:45:00" && newTime >= "00:00:00") {
-                        score = 20;
-                    } else {
-                        score = 0;
-                    }
+            //         if (newTime > "10:00:00") {
+            //             score = 0;
+            //         } else if (newTime <= "10:00:00" && newTime >= "09:46:00") {
+            //             score = 10;
+            //         } else if (newTime <= "09:45:00" && newTime >= "00:00:00") {
+            //             score = 20;
+            //         } else {
+            //             score = 0;
+            //         }
 
-                    // Save attendance data
-                    const userData = new dataModel({
-                        userId: userId,
-                        location,
-                        time,
-                        date,
-                        image: {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        },
-                        punctualityScore: score,
-                    });
+            //         // Save attendance data
+            //         const userData = new dataModel({
+            //             userId: userId,
+            //             location,
+            //             time,
+            //             date,
+            //             image: {
+            //                 public_id: result.public_id,
+            //                 url: result.secure_url,
+            //             },
+            //             punctualityScore: score,
+            //         });
 
-                    userData.save();
-                    user.data.push(userData);
-                    user.save();
+            //         userData.save();
+            //         user.data.push(userData);
+            //         user.save();
 
-                    return res.status(200).json({
-                        message: 'User data created successfully',
-                        Data: userData
-                    });
-                }).end(modifiedImageBuffer);
+            //         return res.status(200).json({
+            //             message: 'User data created successfully',
+            //             Data: userData
+            //         });
+            //     }).end(modifiedImageBuffer);
+            const result = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                  { folder: "AttendanceData-Image" },
+                  (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result);
+                  }
+                ).end(modifiedImageBuffer);
+              });
+              
+              // Once Cloudinary upload succeeds, continue
+              fs.unlinkSync(image.tempFilePath);
+              
+              let score;
+              let newTime = newDate.toLocaleTimeString('en-US', { hour12: false });
+              
+              if (newTime > "10:00:00") {
+                score = 0;
+              } else if (newTime <= "10:00:00" && newTime >= "09:46:00") {
+                score = 10;
+              } else if (newTime <= "09:45:00" && newTime >= "00:00:00") {
+                score = 20;
+              } else {
+                score = 0;
+              }
+              
+              // Save attendance data
+              const userData = new dataModel({
+                userId,
+                location,
+                time,
+                date,
+                image: {
+                  public_id: result.public_id,
+                  url: result.secure_url,
+                },
+                punctualityScore: score,
+              });
+              
+              await userData.save();
+              user.data.push(userData);
+              await user.save();
+              
+              return res.status(200).json({
+                message: 'User data created successfully',
+                Data: userData,
+              });
+              
         } else {
             return res.status(400).json({
                 message: "Sorry you can't checkIn today!"
