@@ -31,12 +31,30 @@ const checkIn = async (req, res) => {
 
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`;
 
-            const response = await fetch(apiUrl);
-            const data = await response.json();
+            // const response = await fetch(apiUrl);
+            // const data = await response.json();
+console.log("everywhere good 1")
+            const response = await fetch(apiUrl, {
+  headers: {
+    'User-Agent': 'student-checkin-app/1.0 (hecurvesotw@gmail.com)',
+    'Accept': 'application/json'
+  }
+});
+console.log("everywhere good 2")
 
-            if (!response.ok) {
-                return res.status(400).json({ message: `Failed to fetch location ${response.statusText}` });
-            }
+if (!response.ok) {
+  const errorText = await response.text();
+  return res.status(400).json({ message: `Failed to fetch location: ${response.status}`, error: errorText.slice(0, 200) });
+}
+console.log("everywhere good 3")
+
+const data = await response.json();
+
+console.log("everywhere good 4")
+
+            // if (!response.ok) {
+            //     return res.status(400).json({ message: `Failed to fetch location ${response.statusText}` });
+            // }
 
             // Extract the address from the response
             const location = data.display_name;
@@ -48,6 +66,7 @@ const checkIn = async (req, res) => {
                     message: "Please enter a valid location"
                 });
             }
+console.log("everywhere good 5")
 
             // Check if an image is uploaded
             if (!req.files || !req.files.image) {
