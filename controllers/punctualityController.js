@@ -7,8 +7,9 @@ const cloudinary = require("../middleware/cloudinary");
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+
 const _ = require('lodash');
-const paymentModel = require("../model/ConfirmPayment")
+const paymentModel = require("../model/ConfirmPayment");
 require('dotenv').config();
 
 
@@ -33,24 +34,20 @@ const checkIn = async (req, res) => {
 
             // const response = await fetch(apiUrl);
             // const data = await response.json();
-console.log("everywhere good 1")
             const response = await fetch(apiUrl, {
   headers: {
     'User-Agent': 'student-checkin-app/1.0 (hecurvesotw@gmail.com)',
     'Accept': 'application/json'
   }
 });
-console.log("everywhere good 2")
 
 if (!response.ok) {
   const errorText = await response.text();
   return res.status(400).json({ message: `Failed to fetch location: ${response.status}`, error: errorText.slice(0, 200) });
 }
-console.log("everywhere good 3")
 
 const data = await response.json();
 
-console.log("everywhere good 4")
 
             // if (!response.ok) {
             //     return res.status(400).json({ message: `Failed to fetch location ${response.statusText}` });
@@ -66,7 +63,6 @@ console.log("everywhere good 4")
                     message: "Please enter a valid location"
                 });
             }
-console.log("everywhere good 5")
 
             // Check if an image is uploaded
             if (!req.files || !req.files.image) {
@@ -163,16 +159,77 @@ console.log("everywhere good 5")
             //             Data: userData
             //         });
             //     }).end(modifiedImageBuffer);
-            const result = await new Promise((resolve, reject) => {
-                cloudinary.uploader.upload_stream(
-                  { folder: "AttendanceData-Image" },
-                  (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result);
-                  }
-                ).end(modifiedImageBuffer);
-              });
-              
+
+
+
+// i watermarked the image here
+const sharp = require("sharp");
+const moment = require('moment-timezone');
+const checkInTime = moment().utcOffset('+01:00');
+
+const outputDir = path.join(__dirname, 'media');
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+}
+    let tempFilePath = req.files.image.tempFilePath;
+if (!fs.existsSync(tempFilePath)) {
+    console.error("Temp file does not exist:", tempFilePath);
+    return res.status(400).json({ message: "File not found" });
+}
+const dateTaken = checkInTime.format('YYYY-MM-DD');
+const timeTaken = checkInTime.format('HH:mm:ss');
+
+        const watermarkText = `Date: ${dateTaken}\nTime: ${timeTaken}`;
+        console.log("josh1")
+        const fileName = path.basename(tempFilePath); 
+const outputFileName = `watermarked-${fileName}`;
+const outputFilePath = path.join(__dirname, 'media', outputFileName);
+
+        console.log("josh2")
+        const newImage = sharp(tempFilePath);
+        const { width, height } = await newImage.metadata();
+        const svgText = `
+            <svg width="${width}" height="${height}">
+               <style>
+    .watermark {
+      fill: white;
+      stroke: black;
+      stroke-width: 2px;
+      font-size: ${Math.floor(width / 15)}px;
+      font-family: Arial, sans-serif;
+      text-anchor: middle;
+    }
+  </style>
+  <text x="50%" y="45%" class="watermark">
+    <tspan x="50%" dy="1.2em">Date: ${dateTaken}</tspan>
+    <tspan x="50%" dy="1.2em">Time: ${timeTaken}</tspan>
+  </text>            </svg>
+        `;
+                console.log("josh2")
+
+        await newImage
+            .composite([{
+                input: Buffer.from(svgText),
+                blend: 'over',
+                gravity: 'center'
+
+            }])
+            .toFile(outputFilePath);
+        
+            console.log("josh3")
+
+
+            // const result = await new Promise((resolve, reject) => {
+            //     cloudinary.uploader.upload_stream(
+            //       { folder: "AttendanceData-Image" },
+            //       (error, result) => {
+            //         if (error) return reject(error);
+            //         resolve(result);
+            //       }
+            //     ).end(modifiedImageBuffer);
+            //   });
+                      const result= await cloudinary.uploader.upload(outputFilePath, { folder: 'AttendanceData-Image' });
+
               // Once Cloudinary upload succeeds, continue
               fs.unlinkSync(image.tempFilePath);
               
