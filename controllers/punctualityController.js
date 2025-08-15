@@ -317,6 +317,15 @@ const checkIn = async (req, res) => {
 
       if (!req.file) return res.status(400).json({ message: 'No image provided' });
 
+            const date = today.toISOString().split('T')[0];
+
+            const checkInStatus = await dataModel.find({ userId: userId });
+            if (checkInStatus.length > 0 && checkInStatus.findIndex((e)=> e.date === date) !== -1) {
+                return res.status(400).json({
+                    message: "Sorry you can only checkIn once per day!"
+                })
+            }
+
       // Watermark with sharp
       const sharp = require("sharp");
       const moment = require('moment-timezone');
