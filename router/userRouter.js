@@ -6,6 +6,7 @@ const { signUp, verify, logIn, forgotPassword, resetPasswordPage, resetPassword,
 const { checkIn, assessmentData, assessmentDataS, fetchCheckInWeekly, fetchAllCheckInWeekly, fetchAssessmentData, fetchOneAssessmentData, deleteCheckIn, deleteWeekCheckIn, deleteAssessment,  runCheck, confirmPayment, healthCheck} = require('../controllers/punctualityController');
 const { authenticate, } = require("../middleware/authentation");
 
+const upload = require('../middleware/multer');
 
 
 /**
@@ -139,7 +140,7 @@ router.post("/signout", authenticate, signOut);
 router.get("/runCheck/:id", runCheck)
 
 //endpoint to add user location and image
-router.post("/checkIn", authenticate, checkIn);
+router.post("/checkIn", authenticate, upload.single('image'),checkIn);
 
 //endpoint to get a student Data and calculate the average punctuality for the current week
 router.get('/assessment/:userId', authenticate, assessmentData);

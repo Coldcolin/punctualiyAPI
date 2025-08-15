@@ -15,14 +15,14 @@ const port = process.env.PORT;
 
 app.use(cors('*'));
 
-app.use(fileUpload({
-    useTempFiles: true,
-    limits:{ fileSize: 5 * 1024 * 1024 },
-    tempFileDir: '/tmp/',
-    debug: true,
-}));
+// app.use(fileUpload({
+//     useTempFiles: true,
+//     limits:{ fileSize: 5 * 1024 * 1024 },
+//     tempFileDir: '/tmp/',
+//     debug: true,
+// }));
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
 const options = {
